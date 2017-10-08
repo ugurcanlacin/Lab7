@@ -1,14 +1,14 @@
-Package: Lab4
+Package: Lab7
 Type: Package
-Title: Lab4
+Title: Lab7
 Version: 1.0.0
 Date: 2017-09-11
 Author: Ugurcan Lacin, Fahad Hameed
 Maintainer: Any issues, contact: <ugurcanlacin@gmail.com>
-Description: Lab4
+Description: Lab7
 License: GPL-3
 Depends: R (>= 2.10)
-URL: https://github.com/ugurcanlacin/Lab4
+URL: https://github.com/ugurcanlacin/Lab7
 LazyData: true
 RoxygenNote: 6.0.1
 Suggests: testthat, ggplot2,
