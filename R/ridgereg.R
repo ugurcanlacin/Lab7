@@ -80,7 +80,11 @@ ridgereg <- setRefClass("ridgereg",
                           return(Coef)
                         }
                       ))
-# ridgereg <-  ridgereg$new(Petal.Length ~ Species, data=iris,0.5)
+
+# library (MASS)
+# lm.ridge(Petal.Length ~ Species, iris)
+# 
+# ridgereg <-  ridgereg$new(Petal.Length ~ Species, data=iris)
 # ridgereg$print()
 # ridgereg$predict()
 # ridgereg$coef()
