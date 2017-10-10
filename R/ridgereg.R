@@ -2,6 +2,7 @@
 #' @description You can have Reference Class containing some calculations by giving formula and data.
 #' @field formula Formula
 #' @field data A data frame
+#' @importFrom methods new
 #' @export ridgereg
 #' @exportClass ridgereg
 ridgereg <- setRefClass("ridgereg",
@@ -82,9 +83,11 @@ ridgereg <- setRefClass("ridgereg",
                       ))
 
 # library (MASS)
-# lm.ridge(Petal.Length ~ Species, iris)
+# lmR <- lm.ridge(Petal.Length ~ Species, iris)
+# round(as.vector(lmR$coef),2)
 # 
 # ridgereg <-  ridgereg$new(Petal.Length ~ Species, data=iris)
+# round(as.vector(ridgereg$Coef[2:3]),2)
 # ridgereg$print()
 # ridgereg$predict()
 # ridgereg$coef()
