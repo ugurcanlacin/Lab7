@@ -20,11 +20,10 @@ visualize_airport_delays = function(){
     group_by(dest,lat,lon) %>%
     summarize(Mean = mean(arr_delay,na.rm = TRUE))
   
-  p <- ggplot(meansWithLatLon, aes(x = dest, y = Mean, label = dest)) +
-    geom_point() + labs(x = "Airports") + theme_bw()
+  p <- ggplot(meansWithLatLon, aes(x = lat, y = lon, label = dest)) +
+    geom_point()  + theme_bw()
   
   return(p)
 }
 
 # visualize_airport_delays()
-

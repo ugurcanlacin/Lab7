@@ -93,7 +93,23 @@ ridgereg <- setRefClass("ridgereg",
 # ridgereg$coef()
 
 
-
-
-
-
+# library(caret)
+# library(mlbench)
+# 
+# data("BostonHousing")
+# trainIndex <- createDataPartition(BostonHousing$lstat, p = .7, 
+#                                   list = FALSE, 
+#                                   times = 1)
+# 
+# train <- BostonHousing[ trainIndex,]
+# test  <- BostonHousing[-trainIndex,]
+# 
+# ridge <- train(lstat ~., data = train,
+#                method='leapForward')
+# 
+# summary(ridge)
+# 
+# 
+# ldaModelInfo <- getModelInfo(model = "leapForward", regex = FALSE)[[1]]
+# 
+# customModel <- list(label = "Custom Ridgereg implementation", type = "Regression")
