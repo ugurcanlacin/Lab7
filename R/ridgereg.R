@@ -10,14 +10,21 @@ ridgereg <- setRefClass("ridgereg",
                                     Fits="numeric",
                                     Coef="numeric",
                                     data="data.frame",
+                                    beta_zero = "numeric",
                                     Call="character",
+                                    beta_hat_reg = "matrix",
                                     lambda="numeric",mat="matrix"),
                       
                       methods = list(
                         initialize = function(formula = formula, data = data,lambda=0){
                           
                           x<-model.matrix(formula,data)
-                          x[,2:ncol(x)]<-apply(x[,2:ncol(x)],2,function(a) (a-mean(a))/sd(a))
+                          x <- x[,-1] # Removes (Intercept)
+                          x[,1:ncol(x)]<-apply(x[,1:ncol(x)],2,function(a) (a-mean(a))/sd(a))
+                          
+                          qr_mat <- qr(x)
+                          Q <- qr.Q(qr_mat)
+                          R <- qr.R(qr_mat)
                           
                           y<-all.vars(formula)[1]
                           y<-as.matrix(data[,names(data)==y])
@@ -26,7 +33,12 @@ ridgereg <- setRefClass("ridgereg",
                           data <<- temp_data
                           
                           I_lambda<-matrix(nrow=ncol(x),ncol=ncol(x),data = 0)
-                          b_hat<-(solve((t(x)%*%x)+I_lambda))%*%(t(x)%*%y)
+                          
+                          # Ridge regression coefficients
+                          beta_hat_reg <<- 
+                            solve(t(R) %*% R + 0.5 * diag(dim(t(R) %*% R)[1])) %*% t(x) %*% y
+                          
+                          b_hat<-(solve((t(x)%*%x)+lambda))%*%(t(x)%*%y)
                           y_fits<-x%*%b_hat
                           
                           coef<-as.numeric(b_hat)
@@ -35,6 +47,7 @@ ridgereg <- setRefClass("ridgereg",
                           y_fits<-as.numeric(y_fits)
                           names(y_fits)<-rownames(y_fits)
                           
+                          beta_zero <<- mean(y)
                           Fits <<- y_fits
                           Coef <<- coef
                           formula<<-formula
@@ -74,10 +87,30 @@ ridgereg <- setRefClass("ridgereg",
                           cat(beta)
                           
                         },
-                        predict = function(){
-                          return(Fits)
+                        predict = function(values = NULL) {
+                          "Prediction function"
+                          if(is.null(values)==TRUE){
+                            if(length(Fits)==1){
+                              svar<-Fits[[1]]
+                            }
+                            else svar<-Fits
+                            return(svar)
+                          }
+                          if (is.null(values)==FALSE){
+                            if((all(names(values)==names(Coef[[1]][2:length(Coef[[1]])])))==FALSE){
+                              stop("Vaiables not matchs")
+                            }
+                            values2<-cbind("(Intercept)"=1,values)
+                            predict<-list()
+                            c <- Coef
+                            for(i in 1: length(lambda)){
+                              predict[[i]]<-as.numeric((Coef[[i]])%*%t(as.matrix(values2)))
+                            }
+                            return(predict)
+                          }
                         },
                         coef = function(){
+                          "Returns coefficients"
                           return(Coef)
                         }
                       ))
@@ -86,7 +119,7 @@ ridgereg <- setRefClass("ridgereg",
 # lmR <- lm.ridge(Petal.Length ~ Species, iris)
 # round(as.vector(lmR$coef),2)
 # 
-# ridgereg <-  ridgereg$new(Petal.Length ~ Species, data=iris)
+# ridgereg <-  ridgereg$new(Petal.Length ~ Sepal.Width + Sepal.Length, data=iris)
 # round(as.vector(ridgereg$Coef[2:3]),2)
 # ridgereg$print()
 # ridgereg$predict()
@@ -97,12 +130,60 @@ ridgereg <- setRefClass("ridgereg",
 # library(mlbench)
 # 
 # data("BostonHousing")
-# trainIndex <- createDataPartition(BostonHousing$lstat, p = .7, 
-#                                   list = FALSE, 
+# trainIndex <- createDataPartition(BostonHousing$lstat, p = .7,
+#                                   list = FALSE,
 #                                   times = 1)
 # 
 # train <- BostonHousing[ trainIndex,]
 # test  <- BostonHousing[-trainIndex,]
+# 
+# Ridgereg_model <- list(
+#   type = c("Regression"),
+#   library = "Lab7",
+#   loop = NULL,
+#   prob = NULL)
+# 
+# Ridgereg_model$parameters <- data.frame(parameter = "lambda",
+#                                         class = "numeric",
+#                                         label = "lambda")
+# 
+# Ridgereg_model$grid <- function (x, y, len = NULL, search = "grid"){
+#   data.frame(lambda = seq(0,2,by=0.25))
+# }
+# 
+# Ridgereg_model$fit <- function (x, y, wts, param, lev, last, classProbs, ...){
+#   dat <- if (is.data.frame(x))
+#     x
+#   else
+#     as.data.frame(x)
+#   dat$.outcome <- y
+#   
+#   output <-
+#     ridgereg$new(.outcome ~ ., data = dat, lambda = param$lambda, ...)
+#   
+#   output
+# }
+# 
+# 
+# Ridgereg_model$predict <- function(modelFit, newdata, preProc = NULL, submodels = NULL){
+#   if (!is.data.frame(newdata))
+#     newdata <- as.data.frame(newdata)
+#   modelFit$predict(newdata)
+# }
+# 
+# set.seed(22)
+# ctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
+# train(tax ~ ., data=train, method=Ridgereg_model, trControl=ctrl)
+
+# ridgereg <-  ridgereg$new(Petal.Length ~ Sepal.Width + Sepal.Length, data=iris)
+# ridgereg$predict(train)
+
+
+
+
+
+
+
 # 
 # ridge <- train(lstat ~., data = train,
 #                method='leapForward')
@@ -112,4 +193,4 @@ ridgereg <- setRefClass("ridgereg",
 # 
 # ldaModelInfo <- getModelInfo(model = "leapForward", regex = FALSE)[[1]]
 # 
-# customModel <- list(label = "Custom Ridgereg implementation", type = "Regression")
+# customModel <- list(label = "Custom Ridgereg implementation", type = "Regression", fit = )
