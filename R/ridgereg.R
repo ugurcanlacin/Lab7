@@ -123,18 +123,18 @@ ridgereg <- setRefClass(
 # ridgereg$coef()
 
 
-# library(caret)
-# library(mlbench)
-# 
-# data("BostonHousing")
-# boston <- BostonHousing[,-4]
-# colnames(boston[-10])
-# 
-# inTrain <- createDataPartition(y = boston$tax,
-#                                p = .8,
-#                                list = FALSE)
-# training <- boston[ inTrain,]
-# testing <- boston[-inTrain,]
+library(caret)
+library(mlbench)
+
+data("BostonHousing")
+boston <- BostonHousing[,-4]
+colnames(boston[-10])
+
+inTrain <- createDataPartition(y = boston$tax,
+                               p = .8,
+                               list = FALSE)
+training <- boston[ inTrain,]
+testing <- boston[-inTrain,]
 # 
 # Ridgereg_model <- list(
 #   type = c("Regression"),
@@ -176,9 +176,14 @@ ridgereg <- setRefClass(
 
 # ridgereg <-  ridgereg$new(Petal.Length ~ Sepal.Width + Sepal.Length, data=iris)
 # ridgereg$predict(train)
+lm_fit <- train(tax ~ .,
+                data = training,
+                method = "lm",
+                trControl = ctrl,
+                preProc = "scale")
 
-
-
+Test_lm <- predict(lm_fit, testing)
+postResample(Test_lm,testing$tax)
 
 
 

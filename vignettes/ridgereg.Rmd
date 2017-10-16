@@ -109,7 +109,20 @@ ridgereg_fit
 
 As a result, We see that the best $\lambda$ value is 0.
 
+## Evaluation
 
+```{r}
+# "Linear Regression Model"
+Test_lm <- predict(resultLM, test)
+postResample(Test_lm,test$tax)
 
+# "Linear Regression Model with forward selection"
+Test_lmf <- predict(improvedLM, test)
+postResample(Test_lmf,test$tax)
 
+# "Ridgereg Model"
+Test_ridge <- predict(ridgereg_fit, test)
+postResample(Test_ridge,test$tax)
+```
 
+According to comparison, the first model is best one. Even though we did some forward selection and our custom model implementation, we see different result with our test data.
