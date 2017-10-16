@@ -19,12 +19,14 @@ library(mlbench)
 library(Lab7)
 data("BostonHousing")
 set.seed(22)
-trainIndex <- createDataPartition(BostonHousing$lstat, p = .7, 
+boston <- BostonHousing[,-4]
+colnames(boston[-10])
+trainIndex <- createDataPartition(boston$tax, p = .7, 
                                   list = FALSE, 
                                   times = 1)
 
-train <- BostonHousing[ trainIndex,]
-test  <- BostonHousing[-trainIndex,]
+train <- boston[ trainIndex,]
+test  <- boston[-trainIndex,]
 ```
 
 Here We see lm method result. Unfortunately, There are unsignificant results. We should filter them by applying leap forward selection.
@@ -96,13 +98,18 @@ Ridgereg_model$predict <- function(modelFit, newdata, preProc = NULL, submodels 
 }
 ```
 
+Now, set up the 10-fold cross-validation and train the ridgereg() model:
 
 ```{r}
 set.seed(22)
 ctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
-# ridgereg_fit <- train(tax ~ ., data=train, method=Ridgereg_model, trControl=ctrl)
-# ridgereg_fit
+ridgereg_fit <- train(tax ~ ., data=train, method=Ridgereg_model, trControl=ctrl)
+ridgereg_fit
 ```
+
+As a result, We see that the best $\lambda$ value is 0.
+
+
 
 
 
